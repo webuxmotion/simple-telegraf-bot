@@ -2,7 +2,7 @@ require('dotenv').config()
 const Telegraf = require(`telegraf`)
 
 const { BOT_TOKEN, URL } = process.env;
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 80;
 
 const bot = new Telegraf(BOT_TOKEN);
 
