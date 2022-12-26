@@ -11,10 +11,13 @@ bot.help((ctx) => ctx.reply(`Send me a sticker`))
 bot.on(`sticker`, (ctx) => ctx.reply(`👍`))
 bot.hears(`hi`, (ctx) => ctx.reply(`Hey there`))
 
-bot.telegram.setWebhook(`${URL}/bot/${BOT_TOKEN}`);
-bot.startWebhook(`/bot/${BOT_TOKEN}'`, null, PORT);
-console.log('Started with webhook');
+if (process.env.NODE_ENV === 'production') {
+    bot.telegram.setWebhook(`${URL}/bot${BOT_TOKEN}`);
+    bot.startWebhook(`bot${BOT_TOKEN}'`, null, PORT);
+    console.log('Started with webhook');
+} else {
+    bot.launch()
+        .then((res) => console.log(`Launched at ${new Date()}`))
+        .catch((err) => console.log(`ERROR at launch:`, err))
+}
 
-// bot.launch()
-//     .then((res) => console.log(`Launched at ${new Date()}`))
-//     .catch((err) => console.log(`ERROR at launch:`, err))
