@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const { Telegraf, Markup } = require('telegraf');
 
 const { BOT_TOKEN } = process.env;
@@ -152,7 +154,7 @@ if (process.env.NODE_ENV === 'production') {
   
       // Optional secret to be sent back in a header for security.
       // e.g.: `crypto.randomBytes(64).toString("hex")`
-      secretToken: "sdfsdfeeee444545",
+      secretToken: "sdfsdfeeee444545dd",
     },
   })
       .then((res) => console.log(`Launched at ${new Date()}`))
