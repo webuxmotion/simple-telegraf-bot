@@ -8,6 +8,10 @@ app.use((err, req, res, next) => {
     res.status(200).send('Something broke!')
 })
 
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+  })
+
 const Telegraf = require(`telegraf`)
 
 
@@ -23,8 +27,3 @@ bot.hears(`hi`, (ctx) => ctx.reply(`Hey there`))
 bot.launch()
     .then((res) => console.log(`Launched at ${new Date()}`))
     .catch((err) => console.log(`ERROR at launch:`, err))
-
-
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-  })
