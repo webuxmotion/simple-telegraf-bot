@@ -1,29 +1,43 @@
-require('dotenv').config()
-const express = require('express')
-const app = express()
-const port = process.env.PORT || 3000;
+import { Telegraf } from 'telegraf';
+const { message } = require('telegraf/filters');
 
-app.use((err, req, res, next) => {
-    console.error(err.stack)
-    res.status(200).send('Something broke!')
-})
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-  })
+bot.command('quit', async (ctx) => {
+  // Explicit usage
+  await ctx.telegram.leaveChat(ctx.message.chat.id);
 
-const Telegraf = require(`telegraf`)
+  // Using context shortcut
+  await ctx.leaveChat();
+});
 
+bot.on(message('text'), async (ctx) => {
+  // Explicit usage
+  await ctx.telegram.sendMessage(ctx.message.chat.id, `Hello ${ctx.state.role}`);
 
-const { BOT_TOKEN } = process.env;
+  // Using context shortcut
+  await ctx.reply(`Hello ${ctx.state.role}`);
+});
 
-const bot = new Telegraf(BOT_TOKEN);
+bot.on('callback_query', async (ctx) => {
+  // Explicit usage
+  await ctx.telegram.answerCbQuery(ctx.callbackQuery.id);
 
-bot.start((ctx) => ctx.reply(`Welcome!`))
-bot.help((ctx) => ctx.reply(`Send me a sticker`))
-bot.on(`sticker`, (ctx) => ctx.reply(`👍`))
-bot.hears(`hi`, (ctx) => ctx.reply(`Hey there`))
+  // Using context shortcut
+  await ctx.answerCbQuery();
+});
 
-bot.launch()
-    .then((res) => console.log(`Launched at ${new Date()}`))
-    .catch((err) => console.log(`ERROR at launch:`, err))
+bot.on('inline_query', async (ctx) => {
+  const result = [];
+  // Explicit usage
+  await ctx.telegram.answerInlineQuery(ctx.inlineQuery.id, result);
+
+  // Using context shortcut
+  await ctx.answerInlineQuery(result);
+});
+
+bot.launch();
+
+// Enable graceful stop
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
