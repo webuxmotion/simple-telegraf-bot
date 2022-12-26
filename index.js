@@ -1,10 +1,48 @@
 const { Telegraf } = require('telegraf');
 const { BOT_TOKEN } = process.env;
-const bot = new Telegraf(BOT_TOKEN);
-bot.command('oldschool', (ctx) => ctx.reply('Hello'));
-bot.command('hipster', Telegraf.reply('λ'));
+// const bot = new Telegraf(BOT_TOKEN);
+// bot.command('oldschool', (ctx) => ctx.reply('Hello'));
+// bot.command('hipster', Telegraf.reply('λ'));
 const port = process.env.PORT || 3000;
-bot.launch();
+// bot.launch();
+
+
+
+const session = require('telegraf/session')
+const Stage = require('telegraf/stage')
+const Scene = require('telegraf/scenes/base')
+
+// Handler factoriess
+const { enter, leave } = Stage
+
+// Greeter scene
+const greeterScene = new Scene('greeter')
+greeterScene.enter((ctx) => ctx.reply('Hi'))
+greeterScene.leave((ctx) => ctx.reply('Bye'))
+greeterScene.hears('hi', enter('greeter'))
+greeterScene.on('message', (ctx) => ctx.replyWithMarkdown('Send `hi`'))
+
+// Echo scene
+const echoScene = new Scene('echo')
+echoScene.enter((ctx) => ctx.reply('echo scene'))
+echoScene.leave((ctx) => ctx.reply('exiting echo scene'))
+echoScene.command('back', leave())
+echoScene.on('text', (ctx) => ctx.reply(ctx.message.text))
+echoScene.on('message', (ctx) => ctx.reply('Only text messages please'))
+
+const bot = new Telegraf(process.env.BOT_TOKEN)
+const stage = new Stage([greeterScene, echoScene], { ttl: 10 })
+bot.use(session())
+bot.use(stage.middleware())
+bot.command('greeter', (ctx) => ctx.scene.enter('greeter'))
+bot.command('echo', (ctx) => ctx.scene.enter('echo'))
+bot.on('message', (ctx) => ctx.reply('Try /echo or /greeter'))
+
+
+
+
+
+
 
 // // Enable graceful stop
 // process.once('SIGINT', () => bot.stop('SIGINT'));
