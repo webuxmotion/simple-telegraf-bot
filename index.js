@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000;
 // bot.launch();
 
 
-
+const bot = new Telegraf(BOT_TOKEN);
 
 bot.use(Telegraf.log());
 
@@ -137,15 +137,8 @@ bot.action(/.+/, ctx => {
 
 
 
-
-
-
-
-// // Enable graceful stop
-// process.once('SIGINT', () => bot.stop('SIGINT'));
-// process.once('SIGTERM', () => bot.stop('SIGTERM'));
-
-bot.launch({
+if (process.env.NODE_ENV === 'production') {
+  bot.launch({
     webhook: {
       // Public domain for webhook; e.g.: example.com
       domain: 'https://shrouded-hamlet-06986.herokuapp.com/webhook',
@@ -164,3 +157,8 @@ bot.launch({
   })
       .then((res) => console.log(`Launched at ${new Date()}`))
       .catch((err) => console.log(`ERROR at launch:`, err))
+} else {
+  bot.launch()
+      .then((res) => console.log(`Launched at ${new Date()}`))
+      .catch((err) => console.log(`ERROR at launch:`, err))
+}
