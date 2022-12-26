@@ -1,4 +1,8 @@
 const { Telegraf } = require('telegraf');
+const session = require('telegraf/session')
+const Stage = require('telegraf/stage')
+const Scene = require('telegraf/scenes/base')
+
 const { BOT_TOKEN } = process.env;
 // const bot = new Telegraf(BOT_TOKEN);
 // bot.command('oldschool', (ctx) => ctx.reply('Hello'));
@@ -8,9 +12,7 @@ const port = process.env.PORT || 3000;
 
 
 
-const session = require('telegraf/session')
-const Stage = require('telegraf/stage')
-const Scene = require('telegraf/scenes/base')
+
 
 // Handler factoriess
 const { enter, leave } = Stage
