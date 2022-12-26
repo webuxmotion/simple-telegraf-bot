@@ -11,8 +11,8 @@ bot.help((ctx) => ctx.reply(`Send me a sticker`))
 bot.on(`sticker`, (ctx) => ctx.reply(`👍`))
 bot.hears(`hi`, (ctx) => ctx.reply(`Hey there`))
 
-bot.telegram.setWebhook(`${URL}/bot${BOT_TOKEN}`);
-bot.startWebhook(`/bot${BOT_TOKEN}'`, null, PORT);
+bot.telegram.setWebhook(`${URL}/bot/${BOT_TOKEN}`);
+bot.startWebhook(`/bot/${BOT_TOKEN}'`, null, PORT);
 console.log('Started with webhook');
 
 // bot.launch()
