@@ -1,6 +1,4 @@
-const { Telegraf, session } = require('telegraf');
-const Stage = require('telegraf/stage')
-const Scene = require('telegraf/scenes/base')
+const { Telegraf, Markup } = require('telegraf');
 
 const { BOT_TOKEN } = process.env;
 // const bot = new Telegraf(BOT_TOKEN);
@@ -12,32 +10,130 @@ const port = process.env.PORT || 3000;
 
 
 
+bot.use(Telegraf.log());
 
-// Handler factoriess
-const { enter, leave } = Stage
+bot.command("onetime", ctx =>
+	ctx.reply(
+		"One time keyboard",
+		Markup.keyboard(["/simple", "/inline", "/pyramid"]).oneTime().resize(),
+	),
+);
 
-// Greeter scene
-const greeterScene = new Scene('greeter')
-greeterScene.enter((ctx) => ctx.reply('Hi'))
-greeterScene.leave((ctx) => ctx.reply('Bye'))
-greeterScene.hears('hi', enter('greeter'))
-greeterScene.on('message', (ctx) => ctx.replyWithMarkdown('Send `hi`'))
+bot.command("custom", async ctx => {
+	return await ctx.reply(
+		"Custom buttons keyboard",
+		Markup.keyboard([
+			["🔍 Search", "😎 Popular"], // Row1 with 2 buttons
+			["☸ Setting", "📞 Feedback"], // Row2 with 2 buttons
+			["📢 Ads", "⭐️ Rate us", "👥 Share"], // Row3 with 3 buttons
+		])
+			.oneTime()
+			.resize(),
+	);
+});
 
-// Echo scene
-const echoScene = new Scene('echo')
-echoScene.enter((ctx) => ctx.reply('echo scene'))
-echoScene.leave((ctx) => ctx.reply('exiting echo scene'))
-echoScene.command('back', leave())
-echoScene.on('text', (ctx) => ctx.reply(ctx.message.text))
-echoScene.on('message', (ctx) => ctx.reply('Only text messages please'))
+bot.hears("🔍 Search", ctx => ctx.reply("Yay!"));
+bot.hears("📢 Ads", ctx => ctx.reply("Free hugs. Call now!"));
 
-const bot = new Telegraf(process.env.BOT_TOKEN)
-const stage = new Stage([greeterScene, echoScene], { ttl: 10 })
-bot.use(session())
-bot.use(stage.middleware())
-bot.command('greeter', (ctx) => ctx.scene.enter('greeter'))
-bot.command('echo', (ctx) => ctx.scene.enter('echo'))
-bot.on('message', (ctx) => ctx.reply('Try /echo or /greeter'))
+bot.command("special", ctx => {
+	return ctx.reply(
+		"Special buttons keyboard",
+		Markup.keyboard([
+			Markup.button.contactRequest("Send contact"),
+			Markup.button.locationRequest("Send location"),
+		]).resize(),
+	);
+});
+
+bot.command("pyramid", ctx => {
+	return ctx.reply(
+		"Keyboard wrap",
+		Markup.keyboard(["one", "two", "three", "four", "five", "six"], {
+			wrap: (btn, index, currentRow) => currentRow.length >= (index + 1) / 2,
+		}),
+	);
+});
+
+bot.command("simple", ctx => {
+	return ctx.replyWithHTML(
+		"<b>Coke</b> or <i>Pepsi?</i>",
+		Markup.keyboard(["Coke", "Pepsi"]),
+	);
+});
+
+bot.command("inline", ctx => {
+	return ctx.reply("<b>Coke</b> or <i>Pepsi?</i>", {
+		parse_mode: "HTML",
+		...Markup.inlineKeyboard([
+			Markup.button.callback("Coke", "Coke"),
+			Markup.button.callback("Pepsi", "Pepsi"),
+		]),
+	});
+});
+
+bot.command("random", ctx => {
+	return ctx.reply(
+		"random example",
+		Markup.inlineKeyboard([
+			Markup.button.callback("Coke", "Coke"),
+			Markup.button.callback("Dr Pepper", "Dr Pepper", Math.random() > 0.5),
+			Markup.button.callback("Pepsi", "Pepsi"),
+		]),
+	);
+});
+
+bot.command("caption", ctx => {
+	return ctx.replyWithPhoto(
+		{ url: "https://picsum.photos/200/300/?random" },
+		{
+			caption: "Caption",
+			parse_mode: "Markdown",
+			...Markup.inlineKeyboard([
+				Markup.button.callback("Plain", "plain"),
+				Markup.button.callback("Italic", "italic"),
+			]),
+		},
+	);
+});
+
+bot.hears(/\/wrap (\d+)/, ctx => {
+	return ctx.reply(
+		"Keyboard wrap",
+		Markup.keyboard(["one", "two", "three", "four", "five", "six"], {
+			columns: parseInt(ctx.match[1]),
+		}),
+	);
+});
+
+bot.action("Dr Pepper", (ctx, next) => {
+	return ctx.reply("👍").then(() => next());
+});
+
+bot.action("plain", async ctx => {
+	await ctx.answerCbQuery();
+	await ctx.editMessageCaption(
+		"Caption",
+		Markup.inlineKeyboard([
+			Markup.button.callback("Plain", "plain"),
+			Markup.button.callback("Italic", "italic"),
+		]),
+	);
+});
+
+bot.action("italic", async ctx => {
+	await ctx.answerCbQuery();
+	await ctx.editMessageCaption("_Caption_", {
+		parse_mode: "Markdown",
+		...Markup.inlineKeyboard([
+			Markup.button.callback("Plain", "plain"),
+			Markup.button.callback("* Italic *", "italic"),
+		]),
+	});
+});
+
+bot.action(/.+/, ctx => {
+	return ctx.answerCbQuery(`Oh, ${ctx.match[0]}! Great choice`);
+});
 
 
 
